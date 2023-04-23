@@ -10,8 +10,32 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
+model Profile {
+    id        String   @id
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    bio       String?
+    skills    Skill[]
+}
+
+model Skill {
+    id           String   @id @default(cuid())
+    name         String
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+    ownRating    Int
+    othersRating Float    @default(0.0)
+    reviews      Review[]
+    profileId    String
+    profile      Profile  @relation(fields: [profileId], references: [id])
+}
+
+model Review {
+    id        String   @id @default(cuid())
+    createdAt DateTime @default(now())
+    text      String?
+    rating    Int
+    author    String
+    skill     Skill    @relation(fields: [skillId], references: [id])
+    skillId   String
 }
