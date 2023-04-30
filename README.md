@@ -16,10 +16,8 @@ It's a simple app that let's you search through the skilled persons based on use
 
 ## ToDo's
 
-- Make header bar sticky
 - Place all pages in the same layout
 - nice metadata on every page
-- background gradient and header blur
 
 ## How do I deploy this?
 
