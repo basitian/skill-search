@@ -10,6 +10,8 @@ const Header = () => {
 
   if (!userLoaded) return <div />;
 
+  console.log(user);
+
   return (
     <nav className="fixed left-0 top-0 z-20 w-full border-b border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-900">
       <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between p-4 ">
@@ -36,13 +38,15 @@ const Header = () => {
               </button>
             </SignInButton>
           ) : (
-            <Image
-              height={32}
-              width={32}
-              src={user.profileImageUrl}
-              alt="Profile image"
-              className="rounded-full"
-            />
+            <Link href="/profile">
+              <Image
+                height={32}
+                width={32}
+                src={user.profileImageUrl}
+                alt="Profile image"
+                className="rounded-full"
+              />
+            </Link>
           )}
           <button
             data-collapse-toggle="navbar-sticky"
@@ -81,6 +85,18 @@ const Header = () => {
                     "bg-blue-700 text-white md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
                 )}
               >
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/find"
+                className={clsx(
+                  "block rounded py-2 pl-3 pr-4 text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:p-0 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:bg-transparent md:dark:hover:text-blue-500",
+                  pathname == "/find" &&
+                    "bg-blue-700 text-white md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
+                )}
+              >
                 Find
               </Link>
             </li>
@@ -107,18 +123,6 @@ const Header = () => {
               >
                 About
               </a>
-            </li>
-            <li>
-              <Link
-                href="/profile"
-                className={clsx(
-                  "block rounded py-2 pl-3 pr-4 text-gray-900 hover:bg-gray-100 dark:border-gray-700 dark:text-white dark:hover:bg-gray-700 dark:hover:text-white md:p-0 md:hover:bg-transparent md:hover:text-blue-700 md:dark:hover:bg-transparent md:dark:hover:text-blue-500",
-                  pathname == "/profile" &&
-                    "bg-blue-700 text-white md:bg-transparent md:text-blue-700 md:dark:text-blue-500"
-                )}
-              >
-                My Profile
-              </Link>
             </li>
           </ul>
         </div>

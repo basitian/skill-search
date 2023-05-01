@@ -1,6 +1,36 @@
+import { clerkClient } from "@clerk/nextjs/server";
+import type { Skill } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { filterUserForClient } from "~/server/helpers/filterUserForClient";
+
+const addUserToSkills = async (skills: Skill[]) => {
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: skills.map((skill) => skill.profileId),
+    })
+  ).map(filterUserForClient);
+
+  return skills.map((skill) => {
+    const profile = users.find((user) => user.id === skill.profileId);
+
+    if (!profile || !profile.username)
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "User for skill not found",
+      });
+
+    return {
+      skill,
+      profile: {
+        ...profile,
+        username: profile.username,
+      },
+    };
+  });
+};
 
 export const skillRouter = createTRPCRouter({
   create: publicProcedure
@@ -22,8 +52,8 @@ export const skillRouter = createTRPCRouter({
     }),
   search: publicProcedure
     .input(z.object({ term: z.string().optional() }))
-    .query(({ ctx, input }) => {
-      return ctx.prisma.skill.findMany({
+    .query(async ({ ctx, input }) => {
+      const skills = await ctx.prisma.skill.findMany({
         where: {
           name: {
             contains: input.term ? input.term : "",
@@ -35,13 +65,8 @@ export const skillRouter = createTRPCRouter({
           },
         ],
         take: 20,
-        include: {
-          profile: {
-            select: {
-              id: true,
-            },
-          },
-        },
       });
+
+      return addUserToSkills(skills);
     }),
 });

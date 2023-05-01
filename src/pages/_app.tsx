@@ -4,10 +4,19 @@ import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import Head from "next/head";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <ClerkProvider {...pageProps}>
+      <Head>
+        <title>Skill Search</title>
+        <meta
+          name="description"
+          content="Discover the world’s potential... in people "
+        />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
       <Component {...pageProps} />;
     </ClerkProvider>
   );
