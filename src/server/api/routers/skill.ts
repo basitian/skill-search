@@ -3,7 +3,7 @@ import type { Skill } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 const addUserToSkills = async (skills: Skill[]) => {
@@ -33,7 +33,7 @@ const addUserToSkills = async (skills: Skill[]) => {
 };
 
 export const skillRouter = createTRPCRouter({
-  create: publicProcedure
+  create: privateProcedure
     .input(z.object({ name: z.string().min(1).max(80), rating: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const skill = await ctx.prisma.skill.create({
@@ -42,7 +42,7 @@ export const skillRouter = createTRPCRouter({
           ownRating: input.rating,
           profile: {
             connect: {
-              id: "dshlkdsnvldsknv",
+              id: ctx.userId,
             },
           },
         },
@@ -69,4 +69,19 @@ export const skillRouter = createTRPCRouter({
 
       return addUserToSkills(skills);
     }),
+  getSkillsByUserId: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(({ ctx, input }) =>
+      ctx.prisma.skill.findMany({
+        where: {
+          profileId: input.userId,
+        },
+        take: 100,
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+      })
+    ),
 });

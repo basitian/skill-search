@@ -1,23 +1,39 @@
 import { IconSearch } from "@tabler/icons-react";
 import { type NextPage } from "next";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import Jumbo from "~/components/Jumbo";
 import { PageLayout } from "~/components/PageLayout";
 import UserSkillListItem from "~/components/UserSkillListItem";
 import { api } from "~/utils/api";
+import { useRouter } from "next/router";
 
 const Home: NextPage = () => {
   const { register, handleSubmit } = useForm<{ term: string }>();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
+
+  const [searchTerm, setSearchTerm] = useState(
+    (router.query.search as string) || ""
+  );
+
+  useEffect(() => {
+    if (router.query.search) {
+      setSearchTerm(router.query.search as string);
+    }
+  }, [router.query.search]);
 
   const { data } = api.skill.search.useQuery({
     term: searchTerm,
   });
 
-  const onSearchSubmit: SubmitHandler<{ term: string }> = (data) => {
+  const onSearchSubmit: SubmitHandler<{ term: string }> = async (data) => {
     setSearchTerm(data.term);
+    await router.push(
+      data.term !== "" ? `/?search=${data.term}` : "/",
+      undefined,
+      { shallow: true }
+    );
   };
 
   return (

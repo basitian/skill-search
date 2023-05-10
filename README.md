@@ -19,10 +19,12 @@ It's a simple app that let's you search through the skilled persons based on use
 - Get skills for user in profile and user profile
 - Make bio editable
 - Add bio to profile page
-- add trending
-- add landing page info
+- add trending page
+- add landing page infos
+- add footer
 - add find page
 - add user skill infos
+- Nice loading and error states
 
 ## How do I deploy this?
 

@@ -1,21 +1,16 @@
-import { useUser } from "@clerk/nextjs";
-import { IconEdit, IconPlus } from "@tabler/icons-react";
-import { type NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Image from "next/image";
 import { PageLayout } from "~/components/PageLayout";
 import UserSkills from "~/components/UserSkills";
+import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { api } from "~/utils/api";
 
-const ProfilePage: NextPage = () => {
-  const { user, isLoaded } = useUser();
-
-  if (!isLoaded || !user || !user.username) return <div>Loading</div>;
-
+const UserProfilePage: NextPage<{ username: string }> = ({ username }) => {
   const { data: profile } = api.profile.getUserByUsername.useQuery({
-    username: user.username,
+    username,
   });
 
-  if (!profile) return <div>No User found</div>;
+  if (!profile) return <div>404</div>;
 
   return (
     <PageLayout>
@@ -34,14 +29,6 @@ const ProfilePage: NextPage = () => {
                 {profile.username}
               </h5>
             </div>
-
-            <button
-              type="button"
-              className="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              <IconEdit aria-hidden="true" className="-ml-1 mr-2 h-5 w-5" />
-              Edit Bio
-            </button>
           </div>
           <p className="font-normal text-gray-700 dark:text-gray-400">
             {profile.bio}
@@ -51,19 +38,35 @@ const ProfilePage: NextPage = () => {
         <div className="w-full rounded-lg border border-gray-200 bg-white p-6 shadow dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <h2 className="text-2xl font-semibold">Skills</h2>
-            <button
-              type="button"
-              className="inline-flex items-center rounded-lg bg-blue-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              <IconPlus aria-hidden="true" className="-ml-1 mr-2 h-5 w-5" />
-              Add Skill
-            </button>
           </div>
-          <UserSkills userId={user.id} />
+          <UserSkills userId={profile.id} />
         </div>
       </div>
     </PageLayout>
   );
 };
 
-export default ProfilePage;
+export const getStaticProps: GetStaticProps = async (context) => {
+  const ssg = generateSSGHelper();
+  const username = context.params?.username;
+
+  if (typeof username !== "string") throw new Error("no username");
+
+  await ssg.profile.getUserByUsername.prefetch({ username });
+
+  return {
+    props: {
+      trpcState: ssg.dehydrate(),
+      username,
+    },
+  };
+};
+
+export const getStaticPaths = () => {
+  return {
+    paths: [],
+    fallback: "blocking",
+  };
+};
+
+export default UserProfilePage;
