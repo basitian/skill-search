@@ -1,13 +1,17 @@
 import { IconStar, IconStarFilled } from "@tabler/icons-react";
 import Link from "next/link";
 import { api } from "~/utils/api";
+import LoadingSpinner from "./LoadingSpinner";
 
 const UserSkills = (props: { userId: string }) => {
   const { data, isLoading } = api.skill.getSkillsByUserId.useQuery({
     userId: props.userId,
   });
 
-  if (!data || data.length === 0) return <div>No skills yet</div>;
+  if (isLoading) return <LoadingSpinner />;
+
+  if (!data || data.length === 0)
+    return <div className="text-center">No skills yet</div>;
 
   return (
     <ul role="list" className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -28,9 +32,15 @@ const UserSkills = (props: { userId: string }) => {
             <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
               {Array.from(Array(5).keys()).map((_, index) => {
                 return index < skill.ownRating ? (
-                  <IconStarFilled className="h-5 w-5 text-yellow-400" />
+                  <IconStarFilled
+                    key={`${skill.id}_${index}`}
+                    className="h-5 w-5 text-yellow-400"
+                  />
                 ) : (
-                  <IconStar className="h-5 w-5 text-gray-300 dark:text-gray-500" />
+                  <IconStar
+                    key={`${skill.id}_${index}`}
+                    className="h-5 w-5 text-gray-300 dark:text-gray-500"
+                  />
                 );
               })}
             </div>
@@ -40,18 +50,18 @@ const UserSkills = (props: { userId: string }) => {
               {skill.othersRating.toFixed(1)}
             </p>
             <p className="ml-2 font-medium text-gray-900 dark:text-white">
-              Excellent
+              Overall Rating
             </p>
             <span className="mx-2 h-1 w-1 rounded-full bg-gray-900 dark:bg-gray-500"></span>
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
               {`${skill.numOthersRating} ratings`}
             </p>
-            <Link
+            {/* <Link
               href="#"
               className="ml-auto text-sm font-medium text-blue-600 hover:underline dark:text-blue-500"
             >
               Read all reviews
-            </Link>
+            </Link> */}
           </div>
         </li>
       ))}

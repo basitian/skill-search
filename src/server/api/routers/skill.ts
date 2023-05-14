@@ -3,7 +3,11 @@ import type { Skill } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 const addUserToSkills = async (skills: Skill[]) => {
@@ -40,11 +44,7 @@ export const skillRouter = createTRPCRouter({
         data: {
           name: input.name,
           ownRating: input.rating,
-          profile: {
-            connect: {
-              id: ctx.userId,
-            },
-          },
+          profileId: ctx.userId,
         },
       });
 

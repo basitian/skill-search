@@ -1,8 +1,11 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-
-import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { filterUserForClient } from "~/server/helpers/filterUserForClient";
 
 export const profileRouter = createTRPCRouter({
@@ -12,33 +15,25 @@ export const profileRouter = createTRPCRouter({
         username: z.string(),
       })
     )
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input }) => {
       const [user] = await clerkClient.users.getUserList({
         username: [input.username],
       });
 
       if (!user) {
-        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
-      }
-
-      const userProfile = await ctx.prisma.profile.findUnique({
-        where: {
-          id: user.id,
-        },
-      });
-
-      if (!userProfile) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User profile not found",
+          message: `User ${input.username} not found`,
         });
       }
 
-      const filteredUser = filterUserForClient(user);
-
-      return {
-        ...filteredUser,
-        bio: userProfile.bio,
-      };
+      return filterUserForClient(user);
+    }),
+  updateBio: privateProcedure
+    .input(z.object({ bio: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      await clerkClient.users.updateUser(ctx.userId, {
+        publicMetadata: { bio: input.bio },
+      });
     }),
 });

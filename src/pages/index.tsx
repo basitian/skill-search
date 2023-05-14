@@ -7,6 +7,7 @@ import { PageLayout } from "~/components/PageLayout";
 import UserSkillListItem from "~/components/UserSkillListItem";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
+import LoadingSpinner from "~/components/LoadingSpinner";
 
 const Home: NextPage = () => {
   const { register, handleSubmit } = useForm<{ term: string }>();
@@ -23,7 +24,7 @@ const Home: NextPage = () => {
     }
   }, [router.query.search]);
 
-  const { data } = api.skill.search.useQuery({
+  const { data, isLoading } = api.skill.search.useQuery({
     term: searchTerm,
   });
 
@@ -72,33 +73,39 @@ const Home: NextPage = () => {
           </div>
         </form>
 
-        <div className="mx-auto mb-7 w-full max-w-md">
-          <div className=" inline-flex items-center justify-between rounded-full bg-blue-100 px-1 py-1 pr-4 text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-300 ">
-            <span className="mr-3 rounded-full bg-blue-600 px-4 py-1.5 text-xs text-white">
-              {data && data.length}
-            </span>{" "}
-            <span className="text-sm font-medium">
-              {data && searchTerm !== ""
-                ? `${
-                    data.length === 1 ? "Result" : "Results"
-                  } for your search for \"${searchTerm}\"`
-                : "Recently added skills"}
-            </span>
-          </div>
-        </div>
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            <div className="mx-auto mb-7 w-full max-w-md">
+              <div className=" inline-flex items-center justify-between rounded-full bg-blue-100 px-1 py-1 pr-4 text-sm text-blue-700 dark:bg-blue-900 dark:text-blue-300 ">
+                <span className="mr-3 rounded-full bg-blue-600 px-4 py-1.5 text-xs text-white">
+                  {data && data.length}
+                </span>{" "}
+                <span className="text-sm font-medium">
+                  {data && searchTerm !== ""
+                    ? `${
+                        data.length === 1 ? "Result" : "Results"
+                      } for your search for \"${searchTerm}\"`
+                    : "Recently added skills"}
+                </span>
+              </div>
+            </div>
 
-        <ul
-          role="list"
-          className="mx-auto max-w-2xl divide-y divide-gray-200 dark:divide-gray-700"
-        >
-          {data &&
-            data.map((skillWithProfile) => (
-              <UserSkillListItem
-                key={skillWithProfile.skill.id}
-                {...skillWithProfile}
-              />
-            ))}
-        </ul>
+            <ul
+              role="list"
+              className="mx-auto max-w-2xl divide-y divide-gray-200 dark:divide-gray-700"
+            >
+              {data &&
+                data.map((skillWithProfile) => (
+                  <UserSkillListItem
+                    key={skillWithProfile.skill.id}
+                    {...skillWithProfile}
+                  />
+                ))}
+            </ul>
+          </>
+        )}
       </div>
     </PageLayout>
   );
