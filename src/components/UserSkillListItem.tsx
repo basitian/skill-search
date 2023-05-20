@@ -1,3 +1,4 @@
+import { Rating, Star } from "@smastrom/react-rating";
 import { IconStar, IconStarFilled } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -40,7 +41,17 @@ const UserSkillListItem = (props: SkillWithProfile) => (
           <p className="mb-1  text-base font-semibold text-gray-900 dark:text-white">
             {props.skill.name}
           </p>
-          <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
+          <Rating
+            className="max-w-[120px]"
+            value={props.skill.ownRating}
+            readOnly
+            itemStyles={{
+              itemShapes: Star,
+              activeFillColor: "#f59e0b",
+              inactiveFillColor: "#c7c7c7",
+            }}
+          />
+          {/* <div className="inline-flex items-center text-base font-semibold text-gray-900 dark:text-white">
             {Array.from(Array(5).keys()).map((_, index) => {
               return index < props.skill.ownRating ? (
                 <IconStarFilled key={`${props.skill.id}_${index}`} className="h-5 w-5 text-yellow-400" />
@@ -48,7 +59,7 @@ const UserSkillListItem = (props: SkillWithProfile) => (
                 <IconStar key={`${props.skill.id}_${index}`} className="h-5 w-5 text-gray-300 dark:text-gray-500" />
               );
             })}
-          </div>
+          </div> */}
         </div>
       </div>
     </Link>

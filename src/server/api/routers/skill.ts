@@ -84,4 +84,38 @@ export const skillRouter = createTRPCRouter({
         ],
       })
     ),
+  rateSkill: privateProcedure
+    .input(z.object({ skillId: z.string(), rating: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const skill = await ctx.prisma.skill.findUnique({
+        where: {
+          id: input.skillId,
+        },
+      });
+
+      if (!skill) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Skill not found",
+        });
+      }
+
+      if (skill.profileId !== ctx.userId) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You are not authorized to rate this skill",
+        });
+      }
+
+      const updatedSkill = await ctx.prisma.skill.update({
+        where: {
+          id: input.skillId,
+        },
+        data: {
+          ownRating: input.rating,
+        },
+      });
+
+      return updatedSkill;
+    }),
 });
